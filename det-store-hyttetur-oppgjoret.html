@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Det Store Hyttetur Oppgjøret™</title>
+<style>
+  :root{
+    --paper:#efe3cb;
+    --card:#fffdf6;
+    --card-alt:#faf3e3;
+    --ink:#3b2f24;
+    --mut:#8a7560;
+    --line:#e0d2b6;
+    --wood:#6a4f33;
+    --wood-dk:#4b3722;
+    --wood-lt:#a5835b;
+    --f:#33606d;
+    --p1:#3f7a4c;
+    --p2:#b0692c;
+    --p3:#6e5580;
+    --gold:#c9962c;
+    --shadow:0 2px 3px rgba(70,48,22,.06), 0 10px 24px rgba(70,48,22,.10);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;color:var(--ink);
+       font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background-color:var(--paper);
+       background-image:radial-gradient(rgba(120,90,50,.07) 1px, transparent 1px);
+       background-size:22px 22px}
+  .wrap{max-width:880px;margin:0 auto;padding:18px 14px 76px;position:relative;z-index:1}
+
+  /* ── Trespilt skilt i toppen ── */
+  .sign{position:relative;border:1px solid var(--wood-dk);border-radius:14px;padding:24px 26px 20px;
+        background-image:
+          repeating-linear-gradient(0deg, rgba(255,255,255,.045) 0 1px, transparent 1px 6px),
+          repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 3px, transparent 3px 14px),
+          linear-gradient(180deg,#75553a,#5f4429 55%,#553b23);
+        box-shadow:0 12px 26px rgba(60,40,18,.28), inset 0 1px 0 rgba(255,255,255,.12);
+        text-align:center}
+  .sign h1{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+           font-size:clamp(19px,4.6vw,27px);line-height:1.22;margin:4px 0 6px;
+           letter-spacing:.01em;color:#f8ecd4;text-shadow:0 1px 0 rgba(0,0,0,.4)}
+  .sign h1 .tm{font-size:.42em;vertical-align:super;font-weight:600;color:#cdb28a;letter-spacing:0}
+  .sign .tagline{margin:0;font-size:12.5px;letter-spacing:.03em;color:#d9c39a;text-transform:uppercase}
+  .nail{position:absolute;width:11px;height:11px;border-radius:50%;
+        background:radial-gradient(circle at 35% 30%,#e8d5ae,#8b7047 60%,#5f4a2c);
+        box-shadow:0 1px 1px rgba(0,0,0,.35)}
+  .nail.tl{top:9px;left:9px}.nail.tr{top:9px;right:9px}
+  .nail.bl{bottom:9px;left:9px}.nail.br{bottom:9px;right:9px}
+
+  .lead{color:#6f5c46;font-size:13px;margin:14px 4px 12px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+
+  /* ── Oppgjørsbjelken (sticky) ── */
+  .totals{position:sticky;top:0;z-index:9;margin:14px 0 20px;
+          border:6px solid var(--wood);border-radius:14px;overflow:hidden;
+          box-shadow:0 10px 22px rgba(60,40,18,.22)}
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--wood)}
+  .tot{background:#fdf8ec;padding:10px 6px 9px;text-align:center;border-top:4px solid transparent}
+  .tot .tn{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+           font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tot .tv{font-size:17px;font-weight:700;margin-top:2px;color:#3b2f24}
+  .tot .ts{font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums;margin-top:2px}
+  .tot.b1{border-top-color:var(--p1)} .tot.b1 .tn{color:var(--p1)}
+  .tot.b2{border-top-color:var(--p2)} .tot.b2 .tn{color:var(--p2)}
+  .tot.b3{border-top-color:var(--p3)} .tot.b3 .tn{color:var(--p3)}
+  .tfoot{padding:8px 10px;font-size:12px;text-align:center;background:var(--wood);color:#f2e3c6}
+
+  /* ── Seksjonstitler ── */
+  h2{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+     font-size:15px;margin:24px 2px 9px;padding-left:11px;border-left:4px solid var(--wood-lt);
+     display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+  h2 .sum{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+          font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:#6f5c46;
+          border:1px dashed #cbb894;background:#fffdf7;border-radius:8px;padding:2px 9px}
+
+  /* ── Varelister ── */
+  .list{overflow:hidden}
+  .row{display:grid;gap:7px;padding:9px 11px;border-top:1px dashed var(--line)}
+  .row:first-child{border-top:0}
+  .row:nth-child(even){background:var(--card-alt)}
+  .rd{display:flex;gap:9px;align-items:baseline;min-width:0}
+  .nr{flex:0 0 auto;min-width:22px;text-align:right;color:#b9a583;font-size:11px;font-variant-numeric:tabular-nums}
+  .nm{flex:1 1 auto;min-width:0}
+  .nm .pant{color:#9c8768;font-size:12px}
+  .pr{flex:0 0 auto;font-weight:700;color:#4a3826;font-variant-numeric:tabular-nums}
+  .picks{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{position:relative;display:inline-block}
+  .chip input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+  .chip span{display:inline-block;padding:5px 11px;border:1px solid #d9c9ab;border-radius:8px;
+             font-size:12px;color:var(--mut);cursor:pointer;user-select:none;white-space:nowrap;
+             background:#fffdf7;transition:background .12s,color .12s,border-color .12s}
+  .chip input:checked + span{color:#fbf6ea;border-color:transparent;font-weight:600}
+  .c-f  input:checked + span{background:var(--f)}
+  .c-1  input:checked + span{background:var(--p1)}
+  .c-2  input:checked + span{background:var(--p2)}
+  .c-3  input:checked + span{background:var(--p3)}
+  .chip input:focus-visible + span{outline:2px solid var(--f);outline-offset:2px}
+  @media (min-width:640px){ .row{grid-template-columns:minmax(0,1fr) auto;align-items:center} }
+
+  /* ── Slot machine-tall ── */
+  .amt{display:inline-flex;align-items:center;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;vertical-align:middle}
+  .amt .cell{overflow:hidden;height:1.18em}
+  .amt .cell.d{width:.60em}
+  .amt .cell.s{width:.30em;height:1.18em;display:flex;align-items:center;justify-content:center}
+  .amt .strip{display:flex;flex-direction:column;
+              transition:transform .8s cubic-bezier(.14,.85,.24,1);will-change:transform}
+  .amt .strip b{display:block;height:1.18em;line-height:1.18em;text-align:center;font-weight:inherit}
+
+  /* ── Oppgjøret nederst ── */
+  .stitle{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+          font-size:19px;margin:34px 0 10px;text-align:center;letter-spacing:.02em;
+          display:block;border:0;padding:0}
+  .stitle .orn{color:var(--wood-lt);font-size:14px;letter-spacing:.35em}
+  .board{position:relative;overflow:hidden;border:7px solid var(--wood);border-radius:16px;
+         background:linear-gradient(180deg,#fffdf6,#fbf4e4);
+         box-shadow:0 16px 34px rgba(60,40,18,.26), inset 0 0 0 1px var(--line);
+         padding:16px 15px 16px}
+  .board .shine{position:absolute;inset:-30% -60%;pointer-events:none;opacity:0;
+                background:linear-gradient(105deg,transparent 42%,rgba(255,238,196,.55) 50%,transparent 58%)}
+  .board.bump .shine{animation:sweep 1.15s ease .05s}
+  @keyframes sweep{0%{transform:translateX(-115%);opacity:0}15%{opacity:1}100%{transform:translateX(115%);opacity:0}}
+
+  .srow{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px;
+        border:1px dashed var(--line);background:#fffdf8;margin-bottom:9px;
+        border-left:5px solid var(--accent,var(--wood-lt))}
+  .srow .ava{flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+             display:flex;align-items:center;justify-content:center;
+             font-family:Georgia,serif;font-weight:700;font-size:16px;color:#fbf6ea;
+             background:var(--accent,var(--wood));box-shadow:inset 0 -2px 3px rgba(0,0,0,.18)}
+  .srow .sinfo{flex:1 1 auto;min-width:0}
+  .srow .sname{display:block;font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+               font-size:16px;font-weight:700;color:var(--accent);line-height:1.2}
+  .srow .sformula{display:block;font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+  .srow .samount{flex:0 0 auto;font-size:23px;font-weight:700;color:#3b2f24;display:flex;align-items:baseline;gap:4px}
+  .srow .samount .cur{font-size:13px;font-weight:600;color:var(--mut)}
+  .board.bump .srow{animation:rowpop .55s cubic-bezier(.2,.85,.3,1)}
+  .board.bump .srow.r1{animation-delay:0s}
+  .board.bump .srow.r2{animation-delay:.07s}
+  .board.bump .srow.r3{animation-delay:.14s}
+  @keyframes rowpop{0%{transform:scale(1)}38%{transform:scale(1.016)}100%{transform:scale(1)}}
+
+  .rope{height:7px;margin:4px 2px 12px;border-radius:4px;opacity:.85;
+        background-image:repeating-linear-gradient(115deg,var(--wood-lt) 0 7px,#8a6a44 7px 14px)}
+  .sgrand{display:flex;align-items:center;justify-content:space-between;gap:12px;
+          padding:10px 12px;border-radius:12px;background:#f6ecd7;border:1px solid var(--line)}
+  .sgrand .lbl{font-size:12.5px;color:#6f5c46;letter-spacing:.02em}
+  .sgrand .sgamt{font-size:21px;font-weight:700;color:#3b2f24;display:flex;align-items:baseline;gap:4px}
+  .sgrand .sgamt .cur{font-size:12px;font-weight:600;color:#8a7560}
+  .sshare{margin-top:9px;padding:9px 12px;border-radius:12px;background:#fffdf7;border:1px dashed var(--line);
+          font-size:12.5px;color:#6f5c46;display:flex;flex-wrap:wrap;align-items:center;gap:6px;justify-content:center}
+  .sshare .amt{font-size:13.5px;font-weight:700;color:#4a3826}
+  .sfoot{padding:2px 4px 0}
+  .sfoot .note{color:#7c6a54;font-size:12px;margin:12px 2px 0}
+  button{margin:14px 0 0;padding:11px 16px;border-radius:9px;border:1px solid var(--wood-dk);
+         background-image:linear-gradient(180deg,#7d5c3c,#6a4c2f);color:#f8ecd4;
+         font:inherit;font-size:13px;font-weight:600;cursor:pointer;width:100%;
+         box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  button:active{transform:translateY(1px)}
+  pre#sumtxt{margin:10px 0 0;padding:10px;border:1px dashed var(--line);border-radius:9px;background:#fffdf7;
+             white-space:pre-wrap;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* ── Casino-ramme med blinkende lyspærer rundt oppgjøret ── */
+  .marquee{position:relative;border-radius:22px;
+           box-shadow:0 0 42px rgba(255,192,70,.20), 0 0 90px rgba(255,160,40,.10)}
+  .marquee::after{content:"";position:absolute;inset:5px;border-radius:11px;
+                  border:1px solid rgba(212,175,55,.5);pointer-events:none;z-index:2}
+  .bulbs{position:absolute;inset:0;pointer-events:none;z-index:3}
+  .bulb{position:absolute;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;
+        background:radial-gradient(circle at 34% 28%,#8a795c,#4c3f2b 55%,#2a2216 100%);
+        box-shadow:inset 0 -1px 1px rgba(0,0,0,.55), inset 0 1px 1px rgba(255,255,255,.16),
+                   0 0 0 1px rgba(26,18,9,.55), 0 1px 2px rgba(0,0,0,.35)}
+  /* tent glødelag – legges oppå glasspæren og slås hardt av/på */
+  .bulb::after{content:"";position:absolute;inset:-2px;border-radius:50%;
+        background:radial-gradient(circle at 34% 28%,#fffdec,#ffe27a 40%,#f0b437 68%,#c78a1c 100%);
+        box-shadow:0 0 4px rgba(255,232,150,.95), 0 0 10px rgba(255,196,70,.65), 0 0 20px rgba(255,176,45,.35),
+                   inset 0 -1px 2px rgba(150,100,15,.45);
+        animation:blink 1s steps(1,end) infinite;animation-delay:var(--d,0s)}
+  .bulb.alt::after{background:radial-gradient(circle at 34% 28%,#fff0ec,#ff8a72 40%,#e23a2b 68%,#a51003 100%);
+        box-shadow:0 0 4px rgba(255,160,140,.95), 0 0 10px rgba(255,95,65,.65), 0 0 20px rgba(232,60,30,.38),
+                   inset 0 -1px 2px rgba(120,15,8,.45)}
+  /* hardt av/på-blink – annenhver pære i motsatt fase. Slukket pære = synlig mørkt glass */
+  @keyframes blink{
+    0%{opacity:1}
+    50%{opacity:0}
+    100%{opacity:1}
+  }
+
+  /* ── Statistikkboks ── */
+  .statsboard{position:relative;margin:36px 0 0;border:6px solid var(--wood);border-radius:14px;
+              background:linear-gradient(180deg,#fffdf6,#fbf4e4);overflow:hidden;
+              box-shadow:0 10px 24px rgba(60,40,18,.20), inset 0 0 0 1px var(--line);
+              padding:12px 12px 10px}
+  .stat-head{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;text-align:center;
+             font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:#8a7560;
+             padding:2px 0 9px;border-bottom:1px dashed var(--line)}
+  .stat-foot{display:flex;flex-wrap:wrap;gap:5px 10px;justify-content:center;font-size:12px;
+             color:#6f5c46;border-top:1px dashed var(--line);margin-top:2px;padding:10px 6px 2px}
+  .stat-foot .dot{color:#c7b493}
+
+  /* ── Stolpediagram ── */
+  .chartbox{margin:12px 4px 8px;padding:12px 10px 10px;border:1px dashed var(--line);
+            border-radius:12px;background:#fffdf8}
+  .chart-title{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;font-size:12px;
+               letter-spacing:.14em;text-transform:uppercase;color:#8a7560;text-align:center;margin:0 0 12px}
+  .plotwrap{position:relative;margin-left:48px}
+  .plot{position:relative;height:140px}
+  .grid{position:absolute;inset:0;pointer-events:none}
+  .gridline{position:absolute;left:0;right:0;border-top:1px dashed #ddcdaf}
+  .gridlabel{position:absolute;left:-52px;width:44px;text-align:right;transform:translateY(-50%);
+             font-size:9.5px;color:#a08a6c;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .cols{position:absolute;inset:0;display:flex;gap:12px;align-items:flex-end}
+  .ccol{flex:1 1 0;display:flex;flex-direction:column;justify-content:flex-end;
+        align-items:stretch;position:relative;z-index:1}
+  .ctotal{text-align:center;font-size:11.5px;font-weight:700;color:#3b2f24;
+          font-variant-numeric:tabular-nums;margin-bottom:3px;white-space:nowrap}
+  .cseg{position:relative;height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;
+        transition:height .7s cubic-bezier(.2,.85,.3,1)}
+  .cseg.own{background-image:linear-gradient(180deg,rgba(255,255,255,.30),rgba(0,0,0,.08))}
+  .cseg.shared{background-color:var(--f);
+               background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(0,0,0,.10))}
+  .cseg .clab{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.96);letter-spacing:.02em;
+              white-space:nowrap;opacity:0;transition:opacity .4s ease .35s}
+  .cseg.show .clab{opacity:1}
+  .chart-names{display:flex;gap:12px;margin-top:7px;padding:0 0 0 48px}
+  .chart-names span{flex:1 1 0;text-align:center;font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+                    font-size:12.5px;font-weight:700}
+  .clegend{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:10px;
+           font-size:11px;color:#6f5c46;flex-wrap:wrap}
+  .clegend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;
+               vertical-align:-1px;border:1px solid rgba(0,0,0,.12)}
+
+  /* ── Rise-inn-animasjon ── */
+  .rise{opacity:0;transform:translateY(16px)}
+  .rise.in{opacity:1;transform:none;
+           transition:opacity .5s ease, transform .6s cubic-bezier(.2,.85,.3,1)}
+
+                   50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 0 0 7px rgba(201,150,44,.22)}}
+
+  /* ── Statusmerke for delt/lokal modus ── */
+  .syncpill{position:fixed;left:12px;bottom:12px;z-index:20;font-size:11.5px;
+            background:#fffdf7;border:1px dashed #d9c9ab;border-radius:999px;padding:5px 12px;
+            color:#6f5c46;box-shadow:0 4px 10px rgba(60,40,18,.15);max-width:80vw;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .syncpill.live{color:#1f6b3a;border-color:#bfe0c8;background:#f2fbf4}
+  .syncpill.warn{color:#8a5a10;border-color:#ecd9ae;background:#fdf7e8}
+
+  /* ── Fallende penger & hytte-emoji i bakgrunnen ── */
+  #emojis{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  #emojis span{position:absolute;top:0;line-height:1;opacity:.30;
+    animation-name:fall;animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+  @keyframes fall{
+    0%  {transform:translate3d(0,-15vh,0) rotate(-8deg)}
+    50% {transform:translate3d(var(--drift,24px),50vh,0) rotate(10deg)}
+    100%{transform:translate3d(0,115vh,0) rotate(-6deg)}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #emojis{display:none}
+    .rise{opacity:1;transform:none;transition:none}
+    .board.bump .shine{animation:none}
+    .board.bump .srow{animation:none}
+    .bulb::after{animation:none}
+  }
+</style>
+</head>
+<body>
+<div id="emojis" aria-hidden="true"></div>
+<div class="syncpill" id="syncPill"
+     title="Når siden serveres, deles avkrysningene live med alle som har den åpen.">Lokal modus</div>
+
+<div class="wrap">
+
+  <header class="sign">
+    <span class="nail tl"></span><span class="nail tr"></span>
+    <span class="nail bl"></span><span class="nail br"></span>
+    <h1>Det Store Hyttetur Oppgjøret<span class="tm">™</span></h1>
+    <p class="tagline">Adrian · Sander · Johannes</p>
+  </header>
+
+  <p class="lead">54 rader fra to kvitteringer (pant er slått sammen med drikken den hører til) · totalt <strong>3 079,11 kr</strong>.
+  Alt står som «Felles» – trykk på den som skal betale varen selv. Fellesvarene deles likt på tre.</p>
+
+  <div class="totals">
+    <div class="tgrid">
+      <div class="tot b1"><div class="tn">Adrian</div><div class="tv"><span class="amt" id="tv0"></span> <span class="cur">kr</span></div><div class="ts" id="ts0"></div></div>
+      <div class="tot b2"><div class="tn">Sander</div><div class="tv"><span class="amt" id="tv1"></span> <span class="cur">kr</span></div><div class="ts" id="ts1"></div></div>
+      <div class="tot b3"><div class="tn">Johannes</div><div class="tv"><span class="amt" id="tv2"></span> <span class="cur">kr</span></div><div class="ts" id="ts2"></div></div>
+    </div>
+    <div class="tfoot" id="tfoot"></div>
+  </div>
+
+  <main id="lists"></main>
+
+  <section class="statsboard rise" id="stats" aria-label="Statistikk">
+    <div class="stat-head">✦ &nbsp;Statistikk&nbsp; ✦</div>
+
+    <div class="chartbox">
+      <div class="chart-title">Forbruk per person</div>
+      <div class="plotwrap">
+        <div class="plot">
+          <div class="grid" id="chartGrid"></div>
+          <div class="cols">
+            <div class="ccol">
+              <span class="ctotal" id="ct0">–</span>
+              <span class="cseg own" id="co0" style="background-color:var(--p1)"><span class="clab" id="cl0"></span></span>
+              <span class="cseg shared" id="cs0"><span class="clab" id="ch0"></span></span>
+            </div>
+            <div class="ccol">
+              <span class="ctotal" id="ct1">–</span>
+              <span class="cseg own" id="co1" style="background-color:var(--p2)"><span class="clab" id="cl1"></span></span>
+              <span class="cseg shared" id="cs1"><span class="clab" id="ch1"></span></span>
+            </div>
+            <div class="ccol">
+              <span class="ctotal" id="ct2">–</span>
+              <span class="cseg own" id="co2" style="background-color:var(--p3)"><span class="clab" id="cl2"></span></span>
+              <span class="cseg shared" id="cs2"><span class="clab" id="ch2"></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-names">
+        <span style="color:var(--p1)">Adrian</span>
+        <span style="color:var(--p2)">Sander</span>
+        <span style="color:var(--p3)">Johannes</span>
+      </div>
+      <div class="clegend">
+        <span><span class="sw" style="background:var(--f)"></span>Felles andel</span>
+        <span><span class="sw" style="background:linear-gradient(90deg,var(--p1) 0 34%,var(--p2) 34% 66%,var(--p3) 66% 100%)"></span>Egne varer</span>
+      </div>
+    </div>
+
+    <div class="stat-foot" id="statFoot"></div>
+  </section>
+
+  <h2 class="stitle"><span class="orn">✦</span> Oppgjøret <span class="orn">✦</span></h2>
+
+  <div class="marquee" id="marquee">
+  <section class="board" id="board">
+    <div class="shine" aria-hidden="true"></div>
+
+    <div class="srow r1 rise" style="--accent:var(--p1)">
+      <span class="ava">A</span>
+      <span class="sinfo">
+        <span class="sname">Adrian</span>
+        <span class="sformula" id="f0"></span>
+      </span>
+      <span class="samount"><span class="amt" id="a0"></span><span class="cur">kr</span></span>
+    </div>
+
+    <div class="srow r2 rise" style="--accent:var(--p2)">
+      <span class="ava">S</span>
+      <span class="sinfo">
+        <span class="sname">Sander</span>
+        <span class="sformula" id="f1"></span>
+      </span>
+      <span class="samount"><span class="amt" id="a1"></span><span class="cur">kr</span></span>
+    </div>
+
+    <div class="srow r3 rise" style="--accent:var(--p3)">
+      <span class="ava">J</span>
+      <span class="sinfo">
+        <span class="sname">Johannes</span>
+        <span class="sformula" id="f2"></span>
+      </span>
+      <span class="samount"><span class="amt" id="a2"></span><span class="cur">kr</span></span>
+    </div>
+
+    <div class="rope" aria-hidden="true"></div>
+
+    <div class="sgrand rise">
+      <span class="lbl">Totalt begge kvitteringer</span>
+      <span class="sgamt"><span class="amt" id="gSlot"></span><span class="cur">kr</span></span>
+    </div>
+
+    <div class="sshare rise">
+      <span>Fellesvarer</span><span class="amt" id="shSlot"></span><span>kr · fordeles likt på tre personer</span>
+      <span id="remNote" style="color:#9c8768"></span>
+    </div>
+
+    <div class="sfoot rise">
+      <button id="copyBtn" type="button">Kopier oppsummering</button>
+      <pre id="sumtxt" hidden></pre>
+      <p class="note">Prisene er beløpene som faktisk ble betalt (rabattene på Coop Extra Fauske-kvitteringen er allerede trukket fra).
+      Pant er slått sammen med drikken den hører til. Ved deling på tre fordeles øredifferansen slik at summen alltid stemmer helt.</p>
+    </div>
+  </section>
+  <div class="bulbs" id="bulbs" aria-hidden="true"></div>
+  </div>
+</div>
+
+
+<script>
+const NAMES = ["Adrian","Sander","Johannes"];
+
+const RECEIPTS = [
+  {t:"Rema 1000 Innhavet · 03.10.26 kl. 13:06", s:"1 066,86 kr"},
+  {t:"Coop Extra Fauske · 02.10.2026 kl. 18:52", s:"2 012,25 kr"}
+];
+
+/* Pant er slått sammen med drikken den hører til (merket med «+ pant») */
+const ITEMS = [
+{r:1,n:"Smågodt (0,582 kg × 169,00)",p:98.36},
+{r:1,n:"Smil",p:15.00},
+{r:1,n:"Tine lettmelk 0,5 %",p:19.40},
+{r:1,n:"Breezer Lime",p:39.90},
+{r:1,n:"Breezer Lime",p:39.90},
+{r:1,n:"Bacardi Breezer",p:42.40},
+{r:1,n:"Breezer Lime",p:39.90},
+{r:1,n:"Smirnoff Ice",p:40.90},
+{r:1,n:"Guinness boks",pant:2.00,p:56.40},
+{r:1,n:"Ruccula 65 g",p:19.90},
+{r:1,n:"Skogsbacon",p:37.90},
+{r:1,n:"Kyllingbacon",p:29.90},
+{r:1,n:"Bærepose (resirk. 80 %)",p:6.75},
+{r:1,n:"Bærepose (resirk. 80 %)",p:6.75},
+{r:1,n:"Entrecôte (skinpack)",p:104.90},
+{r:1,n:"Mørbradbiff (skinpack)",p:86.90},
+{r:1,n:"Mørbradbiff (skinpack)",p:86.90},
+{r:1,n:"Entrecôte (skinpack)",p:104.90},
+{r:1,n:"Corona Extra 4,5 %",p:35.90},
+{r:1,n:"Corona Extra 4,5 %",p:35.90},
+{r:1,n:"Isbjørn Cider",pant:2.00,p:41.90},
+{r:1,n:"Matfløte 18 %",p:22.40},
+{r:1,n:"Sjalottløk 330 g",p:36.90},
+{r:1,n:"Hvitløk 100 g",p:16.90},
+{r:2,n:"Avokado modnet 2 pk",p:44.90},
+{r:2,n:"Bremykt 250 g",p:35.90},
+{r:2,n:"Coca-Cola uts. 0,5 l",pant:2.00,p:27.50},
+{r:2,n:"Coop appelsinjuice 1,5 l",p:19.90},
+{r:2,n:"Coop bacon u/sv. 130 g (3 stk)",p:75.00},
+{r:2,n:"Coop Beef Sausage",p:42.90},
+{r:2,n:"Coop jordbærsyltetøy",p:31.40},
+{r:2,n:"Coop Spicy Chicken",p:42.90},
+{r:2,n:"Gatorade Cool Blue",pant:2.00,p:22.00},
+{r:2,n:"Gatorade Cool Blue",pant:2.00,p:22.00},
+{r:2,n:"Idun tomatketchup",p:29.90},
+{r:2,n:"Isbjørn Lite glutenfri 10-pk",pant:20.00,p:269.00},
+{r:2,n:"Kjøttpølse 900 g",p:112.50},
+{r:2,n:"Maarud potetgull salt & pepper",p:41.90},
+{r:2,n:"Maarud tortilla mix",p:47.90},
+{r:2,n:"Mack Isbjørn Lite 0,5 l 6-pk",pant:12.00,p:203.40},
+{r:2,n:"Monster Energy 0,5 l",pant:2.00,p:25.90},
+{r:2,n:"Nordlands 0,33 l 12-pk",pant:24.00,p:382.80},
+{r:2,n:"Plastpose (3 stk)",p:20.25},
+{r:2,n:"Prime Time pølsebrød",p:26.00},
+{r:2,n:"Prior kyllingfilet løvtynn",p:46.50},
+{r:2,n:"Prior kyllingbacon",p:36.90},
+{r:2,n:"Red Bull 0,25 l boks",pant:2.00,p:26.90},
+{r:2,n:"Smak appelsinjuice 1 l",pant:3.00,p:47.90},
+{r:2,n:"Smirnoff Ice 0,275 l 4-pk",p:169.60},
+{r:2,n:"Småpotet kokefast 900 g",p:29.90},
+{r:2,n:"Synnøve fløtemysost",p:21.90},
+{r:2,n:"Tomat perle 175 g",p:29.90},
+{r:2,n:"Tørresvik egg M15",p:68.90},
+{r:2,n:"Xtra sprøstekt løk",p:9.90}
+];
+
+const RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fmt = c => (c/100).toLocaleString("nb-NO",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ALMOST = "\u00A0";
+const isDigit = ch => ch >= "0" && ch <= "9";
+
+/* ───────── Slot machine-tall ───────── */
+const SLOT_H = 1.18; /* matcher .amt .cell høyde i em */
+
+function setAmount(el, cents){
+  const text = fmt(cents);
+  const structure = text.replace(/[0-9]/g, "#");
+
+  if(el.dataset.struct !== structure){
+    /* bygg/bygg om cellene */
+    el.dataset.struct = structure;
+    el.innerHTML = "";
+    const cells = [];
+    for(const ch of text){
+      const cell = document.createElement("div");
+      if(isDigit(ch)){
+        cell.className = "cell d";
+        const strip = document.createElement("div");
+        strip.className = "strip";
+        for(let k=0;k<20;k++){
+          const b = document.createElement("b");
+          b.textContent = k % 10;
+          strip.appendChild(b);
+        }
+        const start = Math.floor(Math.random()*10);
+        strip.style.transform = "translateY(" + (-start*SLOT_H).toFixed(4) + "em)";
+        cell.appendChild(strip);
+        cell._strip = strip;
+        cell._pos = start;
+      }else{
+        cell.className = "cell s";
+        cell.textContent = (ch === "\u00A0" || ch === " ") ? "\u00A0" : ch;
+      }
+      el.appendChild(cell);
+      cells.push(cell);
+    }
+    el._cells = cells;
+  }
+
+  /* rull hjulene */
+  let changed = false;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(!isDigit(ch)) continue;
+    const cell = el._cells[i];
+    const d = +ch;
+    if(cell._pos === d) continue;         /* uendret siffer – står stille */
+    changed = true;
+    const strip = cell._strip;
+
+    if(RM){
+      strip.style.transition = "none";
+      strip.style.transform = "translateY(" + (-d*SLOT_H).toFixed(4) + "em)";
+      cell._pos = d;
+      continue;
+    }
+
+    const startPos = cell._pos;
+    const endPos = 10 + d;                /* rull alltid nedover minst ett hakk */
+    strip.style.transition = "none";
+    strip.style.transform = "translateY(" + (-startPos*SLOT_H).toFixed(4) + "em)";
+    void strip.offsetHeight;              /* tving reflow */
+    strip.style.transition = "";
+    const dur = 620 + Math.random()*340;
+    const delay = Math.min(i*18, 260);
+    strip.style.transitionDuration = dur.toFixed(0) + "ms";
+    strip.style.transitionDelay = delay + "ms";
+    strip.style.transform = "translateY(" + (-endPos*SLOT_H).toFixed(4) + "em)";
+    cell._pos = d;
+
+    clearTimeout(cell._t);
+    cell._t = setTimeout(()=>{
+      strip.style.transition = "none";
+      strip.style.transitionDelay = "0ms";
+      strip.style.transform = "translateY(" + (-d*SLOT_H).toFixed(4) + "em)";
+    }, dur + delay + 50);
+  }
+  return changed;
+}
+
+/* ───────── Bygg varelistene ───────── */
+function chip(idx,val,cls,label,checked){
+  return '<label class="chip '+cls+'"><input type="radio" name="it'+idx+'" value="'+val+'"'+(checked?' checked':'')+'>'+
+         '<span>'+label+'</span></label>';
+}
+(function render(){
+  let html = "";
+  for(let ri=0; ri<RECEIPTS.length; ri++){
+    const rec = RECEIPTS[ri];
+    html += '<h2>'+rec.t+'<span class="sum">'+rec.s+'</span></h2>';
+    html += '<div class="card list">';
+    ITEMS.forEach((it,i)=>{
+      if(it.r !== ri+1) return;
+      const idx = i+1;
+      const name = it.n + (it.pant ? ' <span class="pant">+ pant '+fmt(Math.round(it.pant*100)).replace("\u00A0"," ")+'</span>' : '');
+      html += '<div class="row">';
+      html += '<div class="rd"><span class="nr">'+idx+'</span><span class="nm">'+name+'</span><span class="pr">'+fmt(Math.round(it.p*100))+' kr</span></div>';
+      html += '<div class="picks">';
+      html += chip(idx,"f","c-f","Felles",true);
+      html += chip(idx,"1","c-1",NAMES[0],false);
+      html += chip(idx,"2","c-2",NAMES[1],false);
+      html += chip(idx,"3","c-3",NAMES[2],false);
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  document.getElementById("lists").innerHTML = html;
+})();
+
+/* ───────── Beregning + oppdatering ───────── */
+const el = id => document.getElementById(id);
+
+function recalc(){
+  const own = [0,0,0];
+  let shared = 0, sharedCount = 0;
+  ITEMS.forEach((it,i)=>{
+    const r = document.querySelector('input[name="it'+(i+1)+'"]:checked');
+    const v = r ? r.value : "f";
+    const c = Math.round(it.p*100);
+    if(v === "f"){ shared += c; sharedCount++; }
+    else { own[parseInt(v,10)-1] += c; }
+  });
+  const base = Math.floor(shared/3);
+  const rem = shared - base*3;
+  const per = [base + (rem>0?1:0), base + (rem>1?1:0), base];
+  const tot = [0,1,2].map(k => own[k] + per[k]);
+  const grand = own[0]+own[1]+own[2]+shared;
+
+  let changed = false;
+  const top = ["tv0","tv1","tv2"], rows = ["a0","a1","a2"];
+  for(let k=0;k<3;k++){
+    changed = setAmount(el(top[k]), tot[k]) || changed;
+    changed = setAmount(el(rows[k]), tot[k]) || changed;
+    el("f"+k).textContent = "egne " + fmt(own[k]) + " + felles " + fmt(per[k]);
+    el("ts"+k).textContent = "egne " + fmt(own[k]) + " + felles " + fmt(per[k]);
+  }
+  changed = setAmount(el("gSlot"), grand) || changed;
+  changed = setAmount(el("shSlot"), shared) || changed;
+
+  el("tfoot").textContent = "Fellesvarer: " + fmt(shared) + " kr fordelt på tre" + (rem ? " · øredifferanse fordelt" : "");
+  el("remNote").textContent = rem ? "(øredifferanse fordelt på enkeltpersoner)" : "";
+
+  /* ── Statistikk (kun diagramdata) ── */
+  const maxTot = Math.max(tot[0], tot[1], tot[2], 1);
+  let biggest = null;
+  ITEMS.forEach(it => {
+    const c = Math.round(it.p*100);
+    if(!biggest || c > biggest.p) biggest = {n:it.n, p:c};
+  });
+
+  /* ── Stolpediagram ── */
+  const PLOT_H = 140;
+  const niceMax = Math.max(10000, Math.ceil(maxTot/10000)*10000);
+  const gridEl = el("chartGrid");
+  if(gridEl && gridEl.dataset.max !== String(niceMax)){
+    gridEl.dataset.max = String(niceMax);
+    gridEl.innerHTML = "";
+    [0, 0.5, 1].forEach(f => {
+      const line = document.createElement("div");
+      line.className = "gridline";
+      line.style.bottom = (f*PLOT_H) + "px";
+      const lab = document.createElement("span");
+      lab.className = "gridlabel";
+      lab.style.bottom = (f*PLOT_H) + "px";
+      lab.textContent = Math.round(niceMax*f/100).toLocaleString("nb-NO") + " kr";
+      gridEl.appendChild(line);
+      gridEl.appendChild(lab);
+    });
+  }
+  for(let k=0;k<3;k++){
+    const ownH = own[k]/niceMax*PLOT_H;
+    const shH  = per[k]/niceMax*PLOT_H;
+    const co = el("co"+k), cs = el("cs"+k);
+    el("ct"+k).textContent = fmt(tot[k]) + " kr";
+    co.style.height = ownH.toFixed(1) + "px";
+    cs.style.height = shH.toFixed(1) + "px";
+    co.style.borderRadius = "4px 4px 0 0";
+    cs.style.borderRadius = ownH < 1 ? "4px 4px 4px 4px" : "0 0 4px 4px";
+    const lOwn = el("cl"+k), lSh = el("ch"+k);
+    lOwn.textContent = fmt(own[k]);
+    lSh.textContent = fmt(per[k]);
+    co.classList.toggle("show", ownH >= 18);
+    cs.classList.toggle("show", shH >= 18);
+  }
+
+  const footParts = [
+    "Fellespotten: " + fmt(shared) + " kr (" + sharedCount + " varer)",
+    biggest ? "Største enkeltvare: " + biggest.n + " (" + fmt(biggest.p) + " kr)" : "",
+    "Personlige varer: " + (ITEMS.length - sharedCount) + " av " + ITEMS.length
+  ].filter(Boolean);
+  const foot = el("statFoot");
+  foot.innerHTML = "";
+  footParts.forEach((txt, i) => {
+    const s = document.createElement("span");
+    s.textContent = txt;
+    foot.appendChild(s);
+    if(i < footParts.length - 1){
+      const d = document.createElement("span");
+      d.className = "dot";
+      d.textContent = "·";
+      foot.appendChild(d);
+    }
+  });
+
+  if(changed && !RM){
+    const b = el("board");
+    b.classList.remove("bump");
+    void b.offsetWidth;
+    b.classList.add("bump");
+  }
+  el("sumtxt").textContent = buildText(tot, own, per, shared, grand);
+}
+
+function buildText(tot, own, per, shared, grand){
+  let t = "DET STORE HYTTETUR OPPGJØRET™\n";
+  t += "Adrian · Sander · Johannes\n";
+  t += "────────────────────────────────────\n";
+  for(let k=0;k<3;k++){
+    t += NAMES[k] + ": " + fmt(tot[k]) + " kr   (egne varer " + fmt(own[k]) + " + andel felles " + fmt(per[k]) + ")\n";
+  }
+  t += "\nFellesvarer totalt: " + fmt(shared) + " kr\n";
+  t += "Totalt begge kvitteringer: " + fmt(grand) + " kr\n";
+  return t;
+}
+
+document.getElementById("lists").addEventListener("change", e=>{
+  if(e.target && e.target.type === "radio"){
+    recalc();
+    if(SYNC.enabled && !SYNC.applying){
+      const m = /^it(\d+)$/.exec(e.target.name || "");
+      if(m) postChange(Number(m[1]), e.target.value);
+    }
+  }
+});
+
+el("copyBtn").addEventListener("click", function(){
+  const btn = this, pre = el("sumtxt");
+  try{
+    navigator.clipboard.writeText(pre.textContent).then(
+      ()=>{ btn.textContent = "Kopiert!"; },
+      ()=>{ pre.hidden = false; btn.textContent = "Kopier manuelt fra teksten under"; }
+    );
+  }catch(err){
+    pre.hidden = false;
+    btn.textContent = "Kopier manuelt fra teksten under";
+  }
+  setTimeout(()=>{ btn.textContent = "Kopier oppsummering"; }, 2200);
+});
+
+/* ───────── Rise-inn ved scroll ───────── */
+(function reveal(){
+  const els = Array.from(document.querySelectorAll(".rise"));
+  if(RM || !("IntersectionObserver" in window)){
+    els.forEach(e=>e.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  },{threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  els.forEach((e,i)=>{ e.style.transitionDelay = (i*70)+"ms"; io.observe(e); });
+})();
+
+/* ───────── Fallende penger- og hytteemoji i bakgrunnen ───────── */
+(function fallingEmojis(){
+  const layer = el("emojis");
+  if(!layer || RM) return;
+  const EMOJI = ["💰","💸","🪙","💵","🤑","🏔️","🏕️","🛖","🌲","🌲","🎣","🪵","🪓","⛺","🔥"];
+  const N = 34;
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<N;i++){
+    const s = document.createElement("span");
+    s.textContent = EMOJI[i % EMOJI.length];
+    s.style.left = (Math.random()*98).toFixed(2) + "vw";
+    s.style.fontSize = Math.round(16 + Math.random()*22) + "px";
+    const dur = 16 + Math.random()*18;
+    s.style.animationDuration = dur.toFixed(1) + "s";
+    s.style.animationDelay = (-Math.random()*dur).toFixed(1) + "s";
+    s.style.setProperty("--drift", Math.round((Math.random()*2-1)*40) + "px");
+    s.style.opacity = (0.22 + Math.random()*0.16).toFixed(2);
+    frag.appendChild(s);
+  }
+  layer.appendChild(frag);
+})();
+
+/* ───────── Casinoramme: blinkende lyspærer rundt oppgjøret ───────── */
+(function marqueeLights(){
+  const wrap = document.getElementById("marquee");
+  const layer = document.getElementById("bulbs");
+  if(!wrap || !layer) return;
+  const SPACING = 34;
+
+  function layout(){
+    const w = wrap.clientWidth, h = wrap.clientHeight;
+    if(w < 40 || h < 40) return;
+    const nx = Math.max(4, Math.round(w / SPACING));
+    const ny = Math.max(3, Math.round(h / SPACING));
+    const sx = w / nx, sy = h / ny;
+    const pts = [];
+    for(let i = 0; i < nx; i++) pts.push([i*sx + sx/2, 0]);                 /* topp: venstre -> høyre */
+    for(let i = 0; i < ny; i++) pts.push([w, i*sy + sy/2]);                 /* høyre: nedover */
+    for(let i = 0; i < nx; i++) pts.push([w - (i*sx + sx/2), h]);           /* bunn: høyre -> venstre */
+    for(let i = 0; i < ny; i++) pts.push([0, h - (i*sy + sy/2)]);           /* venstre: oppover */
+
+    const frag = document.createDocumentFragment();
+    pts.forEach((pt, i) => {
+      const b = document.createElement("span");
+      b.className = "bulb" + (i % 2 ? " alt" : "");
+      b.style.left = pt[0].toFixed(1) + "px";
+      b.style.top = pt[1].toFixed(1) + "px";
+      b.style.setProperty("--d", i % 2 ? "-0.5s" : "0s");   /* annenhver pære: motsatt fase = vekselvis av/på */
+      frag.appendChild(b);
+    });
+    layer.innerHTML = "";
+    layer.appendChild(frag);
+  }
+
+  layout();
+  setTimeout(layout, 300);   /* på nytt etter at fonter/bredde har satt seg */
+  let raf = 0;
+  window.addEventListener("resize", () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(layout);
+  });
+  if(window.ResizeObserver){
+    new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(layout);
+    }).observe(wrap);
+  }
+})();
+
+recalc();
+
+/* ───────── Delt synkronisering (når siden serveres) ───────── */
+const SYNC = { enabled:false, applying:false };
+
+function applyRemote(vals){
+  SYNC.applying = true;
+  Object.keys(vals || {}).forEach(k => {
+    const input = document.querySelector('input[name="it'+k+'"][value="'+vals[k]+'"]');
+    if(input) input.checked = true;
+  });
+  SYNC.applying = false;
+  recalc();
+}
+
+function postChange(i, v){
+  try{
+    fetch("api/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ i: i, v: v })
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+(function sharedSync(){
+  const pill = document.getElementById("syncPill");
+  const setPill = (txt, cls) => {
+    if(pill){ pill.textContent = txt; pill.className = "syncpill" + (cls ? " " + cls : ""); }
+  };
+  if(location.protocol === "file:"){ setPill("Lokal modus – endringer deles ikke", "warn"); return; }
+  if(typeof fetch !== "function" || typeof EventSource !== "function"){ setPill("Lokal modus – endringer deles ikke", "warn"); return; }
+
+  fetch("api/state")
+    .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(data => {
+      SYNC.enabled = true;
+      applyRemote(data && data.values);
+      setPill("Delt · tilkoblet", "live");
+      try{
+        const es = new EventSource("api/events");
+        es.onopen = () => setPill("Delt · tilkoblet", "live");
+        es.onerror = () => setPill("Delt · kobler til på nytt …", "warn");
+        es.onmessage = ev => {
+          try{
+            const m = JSON.parse(ev.data);
+            if(m && m.type === "set") applyRemote({ [m.i]: m.v });
+          }catch(err){}
+        };
+      }catch(e){}
+    })
+    .catch(() => setPill("Lokal modus – endringer deles ikke", "warn"));
+})();
+</script>
+</body>
+</html>

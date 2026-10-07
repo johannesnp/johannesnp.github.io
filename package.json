@@ -1,0 +1,13 @@
+{
+  "name": "det-store-hyttetur-oppgjoret",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Delt oppgjørsside for hytteturen – serverer siden og synkroniserer avkrysningene live mellom alle som har den åpen.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
